@@ -1,0 +1,84 @@
+// Script Title: JXA Mac Prompt Engineer
+// Description: The script utilizes JXA's standard additions and UI scripting capabilities to create an interactive and user-friendly experience. It serves as a versatile tool for writers, content creators, or anyone seeking inspiration for a writing task, allowing customization of the writing prompt based on the selected role, style, and task.
+
+roles = ["Analyst","Teacher","Marketer","Advertiser","Mindset Coach","Therapist","Journalist","Inventor","Lawyer","Ghostwriter","Website Designer","Best Selling Author","Chief Financial Officer","Expert Copywriter","Prompt Engineer"]
+
+styles = ["Serious","Humorous","Tentative","Confident","Terse","Wordy","Word Cloud","Emojis","Bullet Points"]
+
+tasks = ["Headline","Article","Essay","Book Outline","Email Sequence","Social Media Post","Product Description","Cover Letter","Blog Post","SEO Keywords","Summary","Video Script","Memo","Sales Copy","Analysis","Ad Copy","Speech"]
+
+app = Application.currentApplication()
+app.includeStandardAdditions = true
+
+prompt_role = theChoice('Roles',roles)
+
+console.log('Your role is ' + prompt_role)
+
+prompt_format = theChoice('Style',styles)
+
+console.log(prompt_role + ' in the output of ' + prompt_format)
+
+prompt_task = theChoice('Tasks',tasks)
+
+prompt = 'Your role is ' + prompt_role + ', please write ' + prompt_task + ' and provide it in the style of ' + prompt_format
+
+engineer = app.displayDialog(prompt,
+	{
+	defaultAnswer: '\n\n\n\n',
+	buttons:['Cancel','Go'],
+	defaultButton: 2,
+	withTitle: 'Write your prompt with this mode',
+	withIcon: 'note',
+	})
+	
+complete_prompt = prompt + ': ' + engineer.textReturned;
+
+// console.log(complete_prompt)
+
+app.setTheClipboardTo(complete_prompt)
+
+function theChoice(mode,input){
+
+	if (mode == 'Roles'){
+	choice = app.chooseFromList(input,
+		{
+		withTitle: 'The Roles',
+		withPrompt: 'Choose your Role',
+		multipleSelectionsAllowed:false,
+		emptySelectionAllowed:true
+		})
+		if(choice==''){
+			term = ''
+		}else{
+			term = choice[0];
+		}
+	}else if(mode == 'Formats'){
+	choice = app.chooseFromList(input,
+		{
+		withTitle: 'The Formats',
+		withPrompt: 'Choose your Format',
+		multipleSelectionsAllowed:false,
+		emptySelectionAllowed:true
+		})
+		if(choice==''){
+			term = ''
+		}else{
+			term = choice[0];
+		}	
+	}else{
+	choice = app.chooseFromList(input,
+		{
+		withTitle: 'The Tasks',
+		withPrompt: 'Choose your Task',
+		multipleSelectionsAllowed:false,
+		emptySelectionAllowed:true
+		})
+		if(choice==''){
+			term = ''
+		}else{
+			term = choice[0];
+		}
+			
+	}
+return term
+}
