@@ -1,0 +1,75 @@
+// Script Title: Pages Text to API and Back
+// Description: This script integrates with Pages, an Apple word processing application, and leverages OpenAI's GPT model to generate text based on user input. It's designed to take text from the clipboard, process it through an API call to OpenAI's GPT, and then paste the result back into the Pages document.
+
+// Initialize the Pages application and allow it to perform standard additions like dialog boxes.
+pages = Application("Pages")
+pages.includeStandardAdditions = true
+
+// Variable declarations
+personaPick = ""  // To store the user's chosen persona
+instruction = ""  // To store the instructions from the user
+output = ""       // To store the expected output format or example
+
+// Activate Pages to bring it to the foreground
+pages.activate()
+
+// Get text from the clipboard
+rawText = pages.theClipboard()
+
+// Persona selection logic
+if(personaPick == ""){
+    personaPick = pages.chooseFromList(["Answerman", "Professor", "Researcher", "Storyteller", "Novel Writer"], {
+        withTitle: "Persona",
+        withPrompt: "Choose a persona for your prompt",
+        defaultItems: ["Storyteller"],
+        multipleSelectionsAllowed: false
+    })
+}
+
+persona = "You have the persona of " + personaPick[0]
+
+// Display a dialog to get instructions from the user
+getInstructions = pages.displayDialog("What are your instructions?", {
+    defaultAnswer: "Expand on the following text: " + rawText,
+    withTitle: "Instructions",
+    buttons: ["Cancel", "Output", "Go"]
+})
+
+instructions = "Your instructions are " + getInstructions.textReturned
+
+// Handling the user's choice for the output format
+if(getInstructions.buttonReturned == "Output"){
+    getOutput = pages.displayDialog("Expected output?", {
+        defaultAnswer: "\n\n\n",
+        withTitle: "Output"
+    })
+
+    output = "This is an example of the expected output " + getOutput.textReturned
+}
+
+// Combining user inputs into a single string for API request
+userInput = persona + ' ' + instructions +  ' ' + output
+
+// Constructing the curl command for the API request
+command = `curl https://api.openai.com/v1/chat/completions \
+-H "Content-Type: application/json" \
+-H "Authorization: Bearer API-KEY" \
+-d '{"model": "gpt-3.5-turbo", "messages": [{"role": "assistant", "content": "You are a helpful assistant"}, {"role": "user", "content": "${userInput}"}]}'`
+
+// Execute the shell command using doShellScript
+app = Application.currentApplication();
+app.includeStandardAdditions = true;
+jsonObj = app.doShellScript(command);
+
+// Parse the JSON response
+obj = JSON.parse(jsonObj)
+
+// Extract the content from the response
+catalog = obj.choices[0].message.content
+
+// Copy the result to the clipboard and paste it into the Pages document
+pages.setTheClipboardTo(catalog)
+delay(3)
+se = Application("System Events")
+se.keystroke("v", {using: "command down"})
+delay(3)
