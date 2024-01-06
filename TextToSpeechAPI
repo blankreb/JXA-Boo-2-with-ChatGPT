@@ -1,0 +1,37 @@
+// Script Title: Text to Speech
+// Description: This JXA (JavaScript for Automation) script is designed to convert a given piece of text into speech using OpenAI's Text-to-Speech API. It generates an audio file from the specified text input.
+
+// Initialize the current application and include standard scripting additions for enhanced functionality.
+app = Application.currentApplication()
+app.includeStandardAdditions = true
+
+// Define the text input. This can be an array of strings, each representing a separate piece of text to be converted into speech.
+inputs = ["The remarkable journey of Eleanor of Aquitaine. Born in 1122 in Bordeaux, France, Eleanor was not just any noblewoman. As the heiress to the affluent Duchy of Aquitaine, she was destined for greatness. Fluent in Latin and several Romance languages from a young age, she was a blend of intelligence and nobility. At the tender age of 15, her life took a royal turn when she married Louis VII of France."]
+
+// Specify the filenames for the output audio files. Each file corresponds to an entry in the 'inputs' array.
+filenames = ["~/Speech/Line1.mp3"]
+
+// Iterate over each input text to convert it into speech.
+for(i = 0; i < inputs.length; i++){
+
+    // Extract the current text and corresponding filename from the arrays.
+    theText = inputs[i]
+    filename = filenames[i]
+
+    // Construct the curl command to make an API request to OpenAI's Text-to-Speech service.
+    // This includes setting the model, input text, and voice type, and specifies the output file.
+    command = `curl https://api.openai.com/v1/audio/speech \\
+      -H "Authorization: Bearer API-KEY" \\
+      -H "Content-Type: application/json" \\
+      -d '{ \\
+        "model": "tts-1", \\
+        "input": "${theText}", \\
+        "voice": "alloy" \\
+      }' --output ${filename}`
+
+    // Execute the shell script command to make the API call and generate the audio file.
+    app.doShellScript(command)
+
+    // Delay to ensure the audio file is processed and saved correctly.
+    delay(5)
+}
